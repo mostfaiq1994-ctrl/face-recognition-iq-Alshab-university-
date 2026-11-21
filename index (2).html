@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>نظام التعرف على الوجوه | جامعة الشعب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f9;--card:#fff;--ink:#0d2b45;--mute:#51647a;--line:#d6dfe8;--acc:#1b5fb0;--gold:#a87a1f;--gold2:#e0b44c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#13283d;font-family:"IBM Plex Sans Arabic",Tahoma,"Segoe UI",system-ui,sans-serif;line-height:1.75}
+.bar{position:sticky;top:0;z-index:5;background:var(--ink);color:#fff;display:flex;flex-wrap:wrap;gap:2px 16px;justify-content:space-between;align-items:center;padding:6px 14px}
+.brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600}
+.brand img{height:36px;width:36px;object-fit:contain;background:#fff;border-radius:50%;padding:2px}
+.nav{display:flex;gap:2px}
+.nav button{background:none;color:#b9cadb;border-radius:0;padding:8px 12px;border-bottom:3px solid transparent}
+.nav button[aria-current=page]{color:#fff;border-color:var(--gold2);font-weight:600}
+.view{display:none}.view.on{display:block}
+.wrap{max-width:980px;margin:0 auto;padding:18px 14px}
+.hero{background:var(--ink);color:#fff}
+.hero-in{display:flex;flex-wrap:wrap;gap:20px;align-items:center;padding-top:28px;padding-bottom:32px}
+.hero-t{flex:1 1 420px}
+.logo2{height:72px;width:72px;object-fit:contain;background:#fff;border-radius:50%;padding:4px;margin-bottom:10px;display:block}
+.aff{margin:0;color:var(--gold2);font-weight:600}
+h1{margin:6px 0;font-size:clamp(24px,4.6vw,38px);line-height:1.45;font-weight:700}
+.en{margin:0 0 16px;direction:ltr;text-align:right;color:#9fb6cc;font-size:14px}
+dl.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px 16px;margin:0 0 18px}
+.facts div{border-right:3px solid var(--gold2);padding-right:10px}
+.facts dt{font-size:12px;color:#9fb6cc}.facts dd{margin:0;font-weight:600}
+#mesh{flex:0 1 230px;width:230px;max-width:60%;margin:0 auto}
+#mesh path{fill:none;stroke:#6fc4ee;stroke-width:1;opacity:.75}
+#mesh circle{fill:#d6f0ff}
+.scan{fill:var(--gold2);animation:scan 2.6s ease-in-out 1 both}
+@keyframes scan{from{transform:translateY(20px);opacity:1}to{transform:translateY(285px);opacity:0}}
+@media(prefers-reduced-motion:reduce){.scan{display:none}}
+h2{font-size:20px;margin:26px 0 8px;color:var(--ink)}
+.lead{max-width:70ch;margin:0}
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 26px}
+.feat div{border-top:2px solid var(--ink);padding:10px 0 14px}
+.feat b{display:block;color:var(--ink)}.feat p{margin:2px 0 0;font-size:14px;color:var(--mute)}
+.chips span{display:inline-block;background:#e1eaf3;color:var(--ink);border-radius:6px;padding:1px 10px;margin:3px;font-size:13px;direction:ltr}
+.team{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.team li{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.av{width:42px;height:42px;border-radius:50%;background:var(--ink);color:var(--gold2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex:none}
+.sup{margin-top:16px;background:var(--ink);color:#fff;border-radius:10px;padding:14px 16px}
+.sup small{display:block;color:var(--gold2)}.sup b{font-size:19px}
+.thanks{margin-top:16px;background:var(--card);border-right:4px solid var(--gold);padding:14px 18px;border-radius:4px 0 0 4px}
+.thanks p{margin:6px 0 0;max-width:70ch}
+.foot{text-align:center;color:var(--mute);font-size:13px;padding:22px 14px}
+.app{max-width:780px;margin:0 auto;padding:12px}
+.stage{position:relative;background:#0b1220;border-radius:12px;overflow:hidden;aspect-ratio:4/3}
+.stage video,.stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#cbd5e1;text-align:center;padding:20px;font-size:14px}
+.stats{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap}
+.stats span{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2px 10px;font-size:12px;color:var(--mute)}
+.stats b{color:var(--ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
+button{font:inherit;border:0;border-radius:8px;padding:9px 16px;background:var(--acc);color:#fff;cursor:pointer}
+button.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}
+button.del{background:#fff;color:#b42318;border:1px solid #f1c4c0;padding:4px 10px}
+button.gold{background:var(--gold2);color:var(--ink);font-weight:700}
+button.ghost{background:none;border:1px solid #6d89a6;color:#fff}
+button:disabled{opacity:.5}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #9db8ff;outline-offset:1px}
+input[type=text],select{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+input[type=text]{flex:1;min-width:140px}
+.tabs{display:flex;margin:12px 0 0;border-bottom:2px solid var(--line);overflow-x:auto;white-space:nowrap}
+.tabs button{background:none;color:var(--mute);border-radius:0;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 12px}
+.tabs button[aria-selected=true]{color:var(--acc);border-color:var(--acc);font-weight:700}
+.panel{background:var(--card);border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;padding:14px;display:none}
+.panel.on{display:block}
+.hint{font-size:13px;color:var(--mute);margin:8px 0 0}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right}
+th{color:var(--mute);font-weight:600}
+.tw{overflow-x:auto}
+#chart{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;margin-top:8px;display:none}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center;z-index:9}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<nav class="bar">
+  <div class="brand"><img src="logo.png" alt="شعار جامعة الشعب" onerror="this.remove()"><span>نظام التعرف على الوجوه</span></div>
+  <div class="nav">
+    <button data-go="home" aria-current="page">الرئيسية</button>
+    <button data-go="app" aria-current="false">النظام</button>
+    <button data-go="team" aria-current="false">فريق العمل</button>
+  </div>
+</nav>
+
+<section id="vHome" class="view on">
+  <div class="hero"><div class="wrap hero-in">
+    <div class="hero-t">
+      <img class="logo2" src="logo.png" alt="شعار جامعة الشعب" onerror="this.remove()">
+      <p class="aff">جامعة الشعب، كلية الهندسة وتكنولوجيا المعلومات</p>
+      <h1>تصميم وتنفيذ نظام للتعرف على الوجوه في الزمن الحقيقي</h1>
+      <p class="en">Design and Implementation of a Real-Time Face Recognition System</p>
+      <dl class="facts">
+        <div><dt>القسم</dt><dd>هندسة الأمن السيبراني</dd></div>
+        <div><dt>المرحلة</dt><dd>الرابعة</dd></div>
+        <div><dt>الدراسة</dt><dd>المسائية، شعبة J</dd></div>
+        <div><dt>المشرف</dt><dd>م.م. عدنان هاشم</dd></div>
+      </dl>
+      <div class="row"><button class="gold" data-go="app">ابدأ التجربة</button><button class="ghost" data-go="team">فريق العمل</button></div>
+    </div>
+    <svg id="mesh" viewBox="0 0 240 300" aria-hidden="true"><rect class="scan" x="0" y="0" width="240" height="3"/></svg>
+  </div></div>
+  <div class="wrap">
+    <h2>ملخص المشروع</h2>
+    <p class="lead">يهدف المشروع إلى تصميم وتنفيذ نظام يتعرف على هوية الأشخاص من وجوههم لحظياً عبر كاميرا الحاسوب أو الهاتف، دون تثبيت برنامج ودون إرسال أي صورة إلى سيرفر. يعمل النظام كاملاً داخل المتصفح، ويُقاس أداؤه بمقاييس علمية معتمدة.</p>
+    <h2>ماذا يقدّم النظام</h2>
+    <div class="feat">
+      <div><b>التعرف المباشر</b><p>كشف الوجه وتحديد صاحبه خلال أجزاء من الثانية، مع عرض الاسم ومسافة التطابق.</p></div>
+      <div><b>فحص الحياة</b><p>التحقق من رمش العين لمنع خداع النظام بصورة ثابتة.</p></div>
+      <div><b>تقييم علمي</b><p>حساب FAR وFRR وEER ورسم منحنى الأداء لاختيار الحد الأمثل.</p></div>
+      <div><b>خصوصية البيانات</b><p>تُخزَّن بصمات رقمية فقط على جهاز المستخدم، دون صور ودون سيرفر، وبحماية برمز سري.</p></div>
+    </div>
+    <h2>التقنيات المستخدمة</h2>
+    <div class="chips"><span>JavaScript</span><span>face-api.js</span><span>TensorFlow.js</span><span>ResNet-34</span><span>WebRTC</span><span>IndexedDB</span><span>GitHub Pages</span></div>
+  </div>
+</section>
+
+<section id="vApp" class="view"><div class="app">
+  <div class="stage">
+    <video id="video" playsinline muted></video>
+    <canvas id="overlay"></canvas>
+    <div class="msg" id="stageMsg">اضغط «تشغيل الكاميرا» للبدء</div>
+  </div>
+  <div class="stats">
+    <span>الإطارات: <b id="sFps">0</b> FPS</span>
+    <span>زمن المعالجة: <b id="sMs">0</b> ms</span>
+    <span>الوجوه: <b id="sFaces">0</b></span>
+    <span>المسجلون: <b id="sUsers">0</b></span>
+  </div>
+  <div class="row">
+    <button id="btnCam">تشغيل الكاميرا</button>
+    <button id="btnFlip" class="alt" disabled>تبديل الكاميرا</button>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="rec">التعرف</button>
+    <button role="tab" aria-selected="false" data-tab="reg">تسجيل شخص</button>
+    <button role="tab" aria-selected="false" data-tab="usr">المسجلون</button>
+    <button role="tab" aria-selected="false" data-tab="log">السجل</button>
+    <button role="tab" aria-selected="false" data-tab="ev">التقييم</button>
+    <button role="tab" aria-selected="false" data-tab="ab">عن النظام</button>
+  </div>
+
+  <section class="panel on" id="rec">
+    <label for="thr">حد التطابق (أقل = أكثر صرامة): <b id="thrVal">0.50</b></label>
+    <input type="range" id="thr" min="0.30" max="0.80" step="0.01" value="0.50" style="width:100%">
+    <div class="row">
+      <label for="size">دقة الكشف:</label>
+      <select id="size"><option>160</option><option>224</option><option selected>320</option><option>416</option></select>
+      <label><input type="checkbox" id="live"> فحص الحياة (ارمش بعينيك للتحقق)</label>
+    </div>
+    <p class="hint">رفع دقة الكشف يزيد الدقة ويقلل الـ FPS. فحص الحياة يمنع خداع النظام بصورة ثابتة.</p>
+  </section>
+
+  <section class="panel" id="reg">
+    <div class="row">
+      <input type="text" id="name" placeholder="اسم الشخص" autocomplete="off">
+      <button id="btnEnroll" disabled>تسجيل (5 عينات)</button>
+      <button id="btnPhoto" class="alt">من صورة</button>
+      <input type="file" id="filePhoto" accept="image/*" hidden>
+    </div>
+    <p class="hint">وجه واحد فقط، إضاءة جيدة، قرب مناسب من الكاميرا. حرّك رأسك قليلاً أثناء الالتقاط. سجّل الشخص أكثر من مرة وبظروف مختلفة لتحسين الدقة.</p>
+  </section>
+
+  <section class="panel" id="usr">
+    <div class="row">
+      <button class="alt" id="btnExport">تصدير JSON</button>
+      <button class="alt" id="btnImport">استيراد JSON</button>
+      <button class="alt" id="btnPin">رمز سري</button>
+      <input type="file" id="fileImport" accept=".json" hidden>
+    </div>
+    <div class="tw"><table><thead><tr><th>الاسم</th><th>العينات</th><th></th></tr></thead><tbody id="usrBody"></tbody></table></div>
+  </section>
+
+  <section class="panel" id="log">
+    <div class="row"><button class="alt" id="btnCsv">تصدير CSV</button><button class="alt" id="btnClearLog">مسح السجل</button></div>
+    <p class="hint" id="todayInfo"></p>
+    <div class="tw"><table><thead><tr><th>الاسم</th><th>الوقت</th><th>المسافة</th></tr></thead><tbody id="logBody"></tbody></table></div>
+  </section>
+
+  <section class="panel" id="ev">
+    <div class="row"><button id="btnEval">حساب مقاييس الأداء</button><button class="alt" id="btnBest" disabled>اعتماد الحد الأمثل</button></div>
+    <canvas id="chart" width="640" height="300"></canvas>
+    <div class="tw" id="evOut"></div>
+    <p class="hint">تُحسب المقاييس من بصمات المسجلين: أزواج الشخص نفسه (صحيحة) وأزواج الأشخاص المختلفين (دخيلة). FAR = قبول شخص غريب، FRR = رفض شخص صحيح، EER = نقطة تساويهما. تحتاج شخصين على الأقل بعدة عينات.</p>
+  </section>
+
+  <section class="panel" id="ab">
+    <b>خط المعالجة</b>
+    <ol>
+      <li>الكاميرا ← كشف الوجه (Tiny Face Detector).</li>
+      <li>68 معلماً للوجه: لمحاذاة الوجه وحساب نسبة العين EAR لكشف الرمش.</li>
+      <li>شبكة ResNet-34 تحوّل الوجه إلى بصمة من 128 رقماً.</li>
+      <li>المسافة الإقليدية بين البصمات، والقرار بمقارنتها بحد التطابق.</li>
+    </ol>
+    <ul>
+      <li>المعالجة كلها داخل المتصفح، ولا تُرسل أي صورة إلى سيرفر.</li>
+      <li>تُخزَّن أرقام البصمات فقط (لا صور) في IndexedDB على نفس الجهاز.</li>
+      <li>القيود: الإضاءة والزاوية والتشابه الشديد تؤثر على الدقة، وفحص الرمش لا يمنع فيديو مسجلاً.</li>
+    </ul>
+  </section>
+</div></section>
+
+<section id="vTeam" class="view"><div class="wrap">
+  <h2>فريق العمل</h2>
+  <ul class="team">
+    <li><span class="av">أ</span><b>أحمد طالب عودة</b></li>
+    <li><span class="av">م</span><b>مصطفى خالد جودي</b></li>
+    <li><span class="av">ك</span><b>كاظم جابر جاسم</b></li>
+    <li><span class="av">م</span><b>محمد عبد الخضر يوسف</b></li>
+    <li><span class="av">ح</span><b>حاتم جاسم علوان</b></li>
+  </ul>
+  <div class="sup"><small>المشرف على المشروع</small><b>م.م. عدنان هاشم</b></div>
+  <div class="thanks">
+    <b>شكر وتقدير</b>
+    <p>الحمد لله رب العالمين، والصلاة والسلام على أشرف المرسلين. نتقدم بجزيل الشكر وعظيم الامتنان إلى أستاذنا المشرف م.م. عدنان هاشم، على ما قدّمه من توجيه علمي ودعم متواصل وملاحظات قيّمة كان لها الأثر الكبير في إنجاز هذا المشروع.</p>
+    <p>كما نشكر كلية الهندسة وتكنولوجيا المعلومات وقسم هندسة الأمن السيبراني في جامعة الشعب، وجميع التدريسيين الذين رافقونا خلال سنوات الدراسة، وكل من ساندنا من أهلنا وزملائنا.</p>
+  </div>
+</div></section>
+
+<div class="foot">جامعة الشعب، كلية الهندسة وتكنولوجيا المعلومات، قسم هندسة الأمن السيبراني، 2026</div>
+<div id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+<script>
+const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
+const $ = id => document.getElementById(id);
+const video = $('video'), canvas = $('overlay'), ctx = canvas.getContext('2d');
+let db, users = [], stream = null, running = false, loaded = false, facing = 'user';
+let lastRes = [], lastTs = 0, thr = 0.5, fpsAvg = 0, tracks = [], bestT = null;
+const lastLog = {};
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const dist = (a, b) => faceapi.euclideanDistance(a, b);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function toast(t) { const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => e.classList.remove('on'), 2400); }
+function dl(n, c, t) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([c], { type: t })); a.download = n; a.click(); }
+
+/* ---------- التخزين ---------- */
+function openDB() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('facedb', 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore('users', { keyPath: 'id', autoIncrement: true }); r.result.createObjectStore('logs', { keyPath: 'id', autoIncrement: true }); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+}
+const store = (s, m = 'readonly') => db.transaction(s, m).objectStore(s);
+const req = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+async function loadUsers() {
+  users = await req(store('users').getAll());
+  $('sUsers').textContent = users.length;
+  $('usrBody').innerHTML = users.length ? users.map(u => `<tr><td>${esc(u.name)}</td><td>${u.desc.length}</td><td><button class="del" data-id="${u.id}">حذف</button></td></tr>`).join('') : '<tr><td colspan="3">لا يوجد مسجلون بعد.</td></tr>';
+}
+async function loadLogs() {
+  const all = await req(store('logs').getAll()), today = new Date().toDateString();
+  const names = new Set(all.filter(l => new Date(l.t).toDateString() === today).map(l => l.name));
+  $('todayInfo').textContent = `حضور اليوم: ${names.size} شخص، إجمالي السجلات: ${all.length}`;
+  const last = all.slice().reverse().slice(0, 50);
+  $('logBody').innerHTML = last.length ? last.map(l => `<tr><td>${esc(l.name)}</td><td>${new Date(l.t).toLocaleString('ar-IQ')}</td><td>${l.d.toFixed(3)}</td></tr>`).join('') : '<tr><td colspan="3">السجل فارغ.</td></tr>';
+}
+async function saveSamples(name, samples) {
+  const ex = users.find(u => u.name === name);
+  if (ex) { ex.desc.push(...samples); await req(store('users', 'readwrite').put(ex)); }
+  else await req(store('users', 'readwrite').add({ name, desc: samples }));
+  await loadUsers();
+}
+
+/* ---------- الحماية بالرمز السري ---------- */
+const sha = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map(b => b.toString(16).padStart(2, '0')).join('');
+async function guard() {
+  let h = null; try { h = localStorage.getItem('pin'); } catch {}
+  if (!h || !crypto.subtle) return true;
+  const p = prompt('أدخل الرمز السري');
+  if (p !== null && await sha(p) === h) return true;
+  toast('رمز غير صحيح'); return false;
+}
+async function setPin() {
+  if (!await guard()) return;
+  const p = prompt('رمز سري جديد (اتركه فارغاً لإلغاء الحماية)');
+  if (p === null) return;
+  try { p ? localStorage.setItem('pin', await sha(p)) : localStorage.removeItem('pin'); toast(p ? 'تم تعيين الرمز' : 'أُلغيت الحماية'); } catch { toast('تعذر الحفظ'); }
+}
+
+/* ---------- الموديلات والكاميرا ---------- */
+async function ensureModels() {
+  if (loaded) return;
+  if (typeof faceapi === 'undefined') throw new Error('تعذر تحميل المكتبة، تحقق من الإنترنت (مطلوب أول مرة)');
+  $('stageMsg').textContent = 'جاري تحميل الموديلات...';
+  await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)]);
+  loaded = true;
+}
+async function startCam() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { $('stageMsg').textContent = 'الكاميرا تحتاج HTTPS أو localhost.'; return; }
+  $('btnCam').disabled = true;
+  try {
+    await ensureModels();
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
+    video.srcObject = stream; await video.play();
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    $('stageMsg').style.display = 'none';
+    $('btnCam').textContent = 'إيقاف الكاميرا'; $('btnCam').disabled = false;
+    $('btnFlip').disabled = false; $('btnEnroll').disabled = false;
+    running = true; loop();
+  } catch (e) {
+    $('stageMsg').style.display = 'flex';
+    $('stageMsg').textContent = e.name === 'NotAllowedError' ? 'تم رفض إذن الكاميرا. اسمح بالوصول من إعدادات المتصفح.' : 'خطأ: ' + (e.message || e.name);
+    $('btnCam').disabled = false;
+  }
+}
+function stopCam() {
+  running = false; if (stream) stream.getTracks().forEach(t => t.stop());
+  stream = null; video.srcObject = null; ctx.clearRect(0, 0, canvas.width, canvas.height);
+  $('stageMsg').style.display = 'flex'; $('stageMsg').textContent = 'الكاميرا متوقفة';
+  $('btnCam').textContent = 'تشغيل الكاميرا'; $('btnFlip').disabled = true; $('btnEnroll').disabled = true; lastRes = [];
+}
+
+/* ---------- المطابقة وفحص الحياة ---------- */
+function match(desc) {
+  let best = { name: null, d: 9 };
+  for (const u of users) for (const ref of u.desc) { const d = dist(desc, ref); if (d < best.d) best = { name: u.name, d }; }
+  return best.d < thr ? best : { name: null, d: best.d };
+}
+function ear(p) {
+  const e = (a, b, c, d, f, g) => (Math.hypot(p[b].x - p[g].x, p[b].y - p[g].y) + Math.hypot(p[c].x - p[f].x, p[c].y - p[f].y)) / (2 * Math.hypot(p[a].x - p[d].x, p[a].y - p[d].y));
+  return (e(36, 37, 38, 39, 40, 41) + e(42, 43, 44, 45, 46, 47)) / 2;
+}
+function isLive(box, v, now) {
+  const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
+  let t = tracks.find(k => Math.hypot(k.cx - cx, k.cy - cy) < box.width);
+  if (!t) { t = { lb: 0, closed: false }; tracks.push(t); }
+  t.cx = cx; t.cy = cy; t.seen = now;
+  if (v < 0.21) t.closed = true; else if (v > 0.25 && t.closed) { t.closed = false; t.lb = now; }
+  return now - t.lb < 6000;
+}
+
+/* ---------- الحلقة الرئيسية ---------- */
+async function loop() {
+  if (!running) return;
+  const t0 = performance.now(), useLive = $('live').checked;
+  const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: +$('size').value, scoreThreshold: 0.5 });
+  const res = await faceapi.detectAllFaces(video, opts).withFaceLandmarks().withFaceDescriptors();
+  if (!running) return;
+  lastRes = res; lastTs = Date.now();
+  const now = lastTs; tracks = tracks.filter(k => now - k.seen < 1500);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const fs = Math.max(14, canvas.width / 24);
+  ctx.font = `bold ${fs}px Tahoma, sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+  for (const r of res) {
+    const b = r.detection.box, m = users.length ? match(r.descriptor) : { name: null, d: 9 };
+    const live = useLive ? isLive(b, ear(r.landmarks.positions), now) : true;
+    const ok = m.name && live;
+    const color = ok ? '#22c55e' : m.name ? '#38bdf8' : '#f59e0b';
+    const label = ok ? `${m.name} (${m.d.toFixed(2)})` : m.name ? `${m.name} - ارمش للتحقق` : 'غير معروف';
+    ctx.lineWidth = 3; ctx.strokeStyle = color; ctx.strokeRect(b.x, b.y, b.width, b.height);
+    const w = ctx.measureText(label).width + 12;
+    ctx.fillStyle = color; ctx.fillRect(b.x, Math.max(0, b.y - fs - 8), w, fs + 8);
+    ctx.fillStyle = '#0b1220'; ctx.fillText(label, b.x + 6, Math.max(fs + 8, b.y) - 4);
+    if (ok) logOnce(m);
+  }
+  const ms = performance.now() - t0;
+  fpsAvg = fpsAvg ? fpsAvg * 0.85 + (1000 / ms) * 0.15 : 1000 / ms;
+  $('sFps').textContent = fpsAvg.toFixed(1); $('sMs').textContent = ms.toFixed(0); $('sFaces').textContent = res.length;
+  requestAnimationFrame(loop);
+}
+async function logOnce(m) {
+  const now = Date.now();
+  if (lastLog[m.name] && now - lastLog[m.name] < 10000) return;
+  lastLog[m.name] = now;
+  await req(store('logs', 'readwrite').add({ name: m.name, t: now, d: m.d }));
+  if ($('log').classList.contains('on')) loadLogs();
+}
+
+/* ---------- التسجيل ---------- */
+async function enroll() {
+  const name = $('name').value.trim();
+  if (!name) return toast('اكتب اسم الشخص أولاً');
+  if (!await guard()) return;
+  $('btnEnroll').disabled = true;
+  const N = 5, samples = [], good = r => r.detection.score > 0.7 && r.detection.box.width > video.videoWidth * 0.2;
+  for (let i = 0; i < N; i++) {
+    const t = Date.now(); let ok = false;
+    while (Date.now() - t < 6000) { if (lastTs > t && lastRes.length === 1 && good(lastRes[0])) { ok = true; break; } await sleep(60); }
+    if (!ok) { toast('لم يُرصد وجه واحد واضح. اقترب أو حسّن الإضاءة'); $('btnEnroll').disabled = false; return; }
+    samples.push(Array.from(lastRes[0].descriptor));
+    toast(`تم التقاط العينة ${i + 1} من ${N}`); await sleep(500);
+  }
+  await saveSamples(name, samples);
+  $('name').value = ''; $('btnEnroll').disabled = false; toast(`تم تسجيل ${name}`);
+}
+async function enrollPhoto(f) {
+  const name = $('name').value.trim();
+  if (!name) return toast('اكتب الاسم أولاً');
+  if (!await guard()) return;
+  try {
+    await ensureModels(); $('stageMsg').textContent = running ? '' : 'الكاميرا متوقفة';
+    const img = await faceapi.bufferToImage(f);
+    const d = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 })).withFaceLandmarks().withFaceDescriptor();
+    if (!d) return toast('لم يُرصد وجه في الصورة');
+    await saveSamples(name, [Array.from(d.descriptor)]); toast('أُضيفت عينة لـ ' + name);
+  } catch (e) { toast('خطأ: ' + e.message); }
+}
+
+/* ---------- التقييم: FAR / FRR / EER ---------- */
+function runEval() {
+  const G = [], I = [];
+  for (let a = 0; a < users.length; a++) {
+    const A = users[a].desc;
+    for (let i = 0; i < A.length; i++) {
+      for (let j = i + 1; j < A.length; j++) G.push(dist(A[i], A[j]));
+      for (let b = a + 1; b < users.length; b++) for (const y of users[b].desc) I.push(dist(A[i], y));
+    }
+  }
+  if (G.length < 3 || !I.length) return toast('تحتاج شخصين على الأقل بعدة عينات لكل منهما');
+  const pts = []; let eer = { d: 9 };
+  for (let t = 0.3; t <= 0.9001; t += 0.01) {
+    const frr = G.filter(x => x >= t).length / G.length, far = I.filter(x => x < t).length / I.length;
+    pts.push({ t, frr, far }); const d = Math.abs(frr - far);
+    if (d < eer.d) eer = { d, t, v: (frr + far) / 2 };
+  }
+  bestT = eer.t;
+  const far = I.filter(x => x < thr).length / I.length, frr = G.filter(x => x >= thr).length / G.length;
+  const acc = (G.filter(x => x < thr).length + I.filter(x => x >= thr).length) / (G.length + I.length);
+  const row = (k, v) => `<tr><th>${k}</th><td>${v}</td></tr>`, pc = v => (v * 100).toFixed(2) + '%';
+  $('evOut').innerHTML = '<table>' + row('أزواج الشخص نفسه (صحيحة)', G.length) + row('أزواج أشخاص مختلفين (دخيلة)', I.length)
+    + row('EER', pc(eer.v)) + row('الحد الأمثل (عند EER)', eer.t.toFixed(2))
+    + row(`الدقة عند الحد الحالي ${thr.toFixed(2)}`, pc(acc)) + row('FAR عند الحد الحالي', pc(far)) + row('FRR عند الحد الحالي', pc(frr)) + '</table>';
+  $('btnBest').disabled = false; drawChart(pts, eer.t);
+}
+function drawChart(pts, eerT) {
+  const c = $('chart'), g = c.getContext('2d'), W = c.width, H = c.height, p = 38;
+  c.style.display = 'block'; g.clearRect(0, 0, W, H); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+  const X = t => p + (t - 0.3) / 0.6 * (W - 2 * p), Y = v => H - p - v * (H - 2 * p);
+  g.font = '12px Tahoma'; g.textAlign = 'center'; g.strokeStyle = '#d5dde5'; g.fillStyle = '#5b6b7f';
+  for (let i = 0; i <= 4; i++) { g.beginPath(); g.moveTo(p, Y(i / 4)); g.lineTo(W - p, Y(i / 4)); g.stroke(); g.fillText(i * 25 + '%', 16, Y(i / 4) + 4); }
+  for (let t = 0.3; t <= 0.91; t += 0.1) g.fillText(t.toFixed(1), X(t), H - 18);
+  const line = (k, col) => { g.beginPath(); g.strokeStyle = col; g.lineWidth = 2.5; pts.forEach((q, i) => i ? g.lineTo(X(q.t), Y(q[k])) : g.moveTo(X(q.t), Y(q[k]))); g.stroke(); };
+  line('far', '#c0392b'); line('frr', '#2358d6');
+  g.setLineDash([5, 4]); g.lineWidth = 1.5;
+  g.strokeStyle = '#1f7a4d'; g.beginPath(); g.moveTo(X(eerT), p); g.lineTo(X(eerT), H - p); g.stroke();
+  g.strokeStyle = '#14213d'; g.beginPath(); g.moveTo(X(thr), p); g.lineTo(X(thr), H - p); g.stroke(); g.setLineDash([]);
+  g.textAlign = 'left'; g.fillStyle = '#c0392b'; g.fillText('FAR', p + 6, p + 4); g.fillStyle = '#2358d6'; g.fillText('FRR', p + 40, p + 4);
+  g.fillStyle = '#1f7a4d'; g.fillText('EER', X(eerT) + 4, p + 16); g.fillStyle = '#14213d'; g.fillText('الحالي', X(thr) + 4, p + 30);
+}
+
+/* ---------- الواجهة ---------- */
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === b.dataset.tab));
+  if (b.dataset.tab === 'log') loadLogs();
+  if (b.dataset.tab === 'usr') loadUsers();
+});
+$('btnCam').onclick = () => running ? stopCam() : startCam();
+$('btnFlip').onclick = async () => { facing = facing === 'user' ? 'environment' : 'user'; stopCam(); await startCam(); };
+$('btnEnroll').onclick = enroll;
+$('btnPhoto').onclick = () => $('filePhoto').click();
+$('filePhoto').onchange = e => { if (e.target.files[0]) enrollPhoto(e.target.files[0]); e.target.value = ''; };
+$('thr').oninput = e => { thr = +e.target.value; $('thrVal').textContent = thr.toFixed(2); };
+$('btnEval').onclick = runEval;
+$('btnBest').onclick = () => { thr = bestT; $('thr').value = thr; $('thrVal').textContent = thr.toFixed(2); runEval(); toast('تم اعتماد الحد الأمثل'); };
+$('btnPin').onclick = setPin;
+$('usrBody').onclick = async e => {
+  const id = e.target.dataset.id; if (!id || !await guard()) return;
+  if (confirm('حذف هذا الشخص؟')) { await req(store('users', 'readwrite').delete(+id)); loadUsers(); }
+};
+$('btnClearLog').onclick = async () => { if (await guard()) { await req(store('logs', 'readwrite').clear()); loadLogs(); } };
+$('btnCsv').onclick = async () => {
+  const all = await req(store('logs').getAll());
+  dl('attendance.csv', '\ufeff' + ['الاسم,الوقت,المسافة', ...all.map(l => `"${l.name.replace(/"/g, '""')}",${new Date(l.t).toISOString()},${l.d.toFixed(3)}`)].join('\n'), 'text/csv');
+};
+$('btnExport').onclick = async () => { if (await guard()) dl('faces.json', JSON.stringify(users.map(({ name, desc }) => ({ name, desc }))), 'application/json'); };
+$('btnImport').onclick = () => $('fileImport').click();
+$('fileImport').onchange = async e => {
+  try {
+    if (!await guard()) return;
+    const arr = JSON.parse(await e.target.files[0].text());
+    for (const u of arr) await saveSamples(u.name, u.desc);
+    toast('تم الاستيراد');
+  } catch { toast('ملف غير صالح'); }
+  e.target.value = '';
+};
+(async () => { db = await openDB(); await loadUsers(); })();
+</script>
+<script>(() => {
+  const views = { home: $('vHome'), app: $('vApp'), team: $('vTeam') };
+  function go(v) {
+    if (v !== 'app' && running) stopCam();
+    for (const k in views) views[k].classList.toggle('on', k === v);
+    document.querySelectorAll('.nav button').forEach(b => b.setAttribute('aria-current', b.dataset.go === v ? 'page' : 'false'));
+    scrollTo(0, 0);
+  }
+  document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+  const P = { o: [[120,30],[80,45],[55,80],[48,125],[55,170],[75,215],[100,245],[120,255],[140,245],[165,215],[185,170],[192,125],[185,80],[160,45]],
+    le: [[85,115],[100,108],[115,115],[100,122]], re: [[125,115],[140,108],[155,115],[140,122]],
+    n: [[120,130],[120,160],[108,172],[132,172]], m: [[95,205],[120,212],[145,205],[120,220]] };
+  const closed = { o: 1, le: 1, re: 1, m: 1 };
+  let d = '', c = '';
+  for (const k in P) { d += 'M' + P[k].map(p => p.join(' ')).join('L') + (closed[k] ? 'Z' : ''); c += P[k].map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.6"/>`).join(''); }
+  d += 'M100 108L120 130M140 108L120 130M85 115L55 80M155 115L185 80M120 30L100 108M120 30L140 108M95 205L75 215M145 205L165 215M120 160L120 212';
+  $('mesh').insertAdjacentHTML('afterbegin', `<path d="${d}"/>${c}`);
+})();
+</script>
+</body>
+</html>
