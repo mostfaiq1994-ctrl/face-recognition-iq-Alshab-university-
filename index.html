@@ -79,6 +79,12 @@ th{color:var(--mute);font-weight:600}
 #chart{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;margin-top:8px;display:none}
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center;z-index:9}
 #toast.on{opacity:1}
+input[type=password]{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;width:100%;direction:ltr}
+dialog{border:1px solid var(--line);border-radius:12px;padding:16px;width:min(92vw,340px);color:#13283d}
+dialog::backdrop{background:rgba(13,43,69,.55)}
+dialog h3{margin:0 0 4px;color:var(--ink)}
+dialog input[type=text]{width:100%;direction:ltr}
+select{max-width:100%}
 </style>
 </head>
 <body>
@@ -88,6 +94,7 @@ th{color:var(--mute);font-weight:600}
     <button data-go="home" aria-current="page">الرئيسية</button>
     <button data-go="app" aria-current="false">النظام</button>
     <button data-go="team" aria-current="false">فريق العمل</button>
+    <button id="btnAdmin" class="gold" style="border-radius:8px;padding:6px 12px;margin-inline-start:6px">دخول المشرف</button>
   </div>
 </nav>
 
@@ -134,6 +141,7 @@ th{color:var(--mute);font-weight:600}
     <span>زمن المعالجة: <b id="sMs">0</b> ms</span>
     <span>الوجوه: <b id="sFaces">0</b></span>
     <span>المسجلون: <b id="sUsers">0</b></span>
+    <span>الخادم: <b id="sCloud">محلي</b></span>
   </div>
   <div class="row">
     <button id="btnCam">تشغيل الكاميرا</button>
@@ -153,6 +161,7 @@ th{color:var(--mute);font-weight:600}
     <label for="thr">حد التطابق (أقل = أكثر صرامة): <b id="thrVal">0.50</b></label>
     <input type="range" id="thr" min="0.30" max="0.80" step="0.01" value="0.50" style="width:100%">
     <div class="row">
+      <label for="det">الكاشف:</label><select id="det"><option value="tiny">سريع (Tiny)</option><option value="ssd">دقيق (SSD)</option></select>
       <label for="size">دقة الكشف:</label>
       <select id="size"><option>160</option><option>224</option><option selected>320</option><option>416</option></select>
       <label><input type="checkbox" id="live"> فحص الحياة (ارمش بعينيك للتحقق)</label>
@@ -227,6 +236,15 @@ th{color:var(--mute);font-weight:600}
 </div></section>
 
 <div class="foot">جامعة الشعب، كلية الهندسة وتكنولوجيا المعلومات، قسم هندسة الأمن السيبراني، 2026</div>
+<dialog id="dlg">
+  <h3>دخول المشرف</h3>
+  <p class="hint">تُحفظ البيانات في مستودع GitHub خاص بك، ولا يصل إليها أحد بدون الرمز.</p>
+  <div class="row"><input type="text" id="repo" placeholder="المستودع: user/repo" dir="ltr" autocomplete="off"></div>
+  <div class="row"><input type="password" id="tok" placeholder="GitHub Token" autocomplete="off"></div>
+  <label class="hint"><input type="checkbox" id="remember"> تذكرني على هذا الجهاز (جهازي الشخصي فقط)</label>
+  <p id="lerr" class="hint" style="color:#b42318;margin:6px 0"></p>
+  <div class="row"><button id="doLogin">دخول</button><button class="alt" id="closeLogin">إلغاء</button></div>
+</dialog>
 <div id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
@@ -301,7 +319,7 @@ async function startCam() {
   $('btnCam').disabled = true;
   try {
     await ensureModels();
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 960 }, height: { ideal: 720 } }, audio: false });
     video.srcObject = stream; await video.play();
     canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     $('stageMsg').style.display = 'none';
@@ -323,9 +341,12 @@ function stopCam() {
 
 /* ---------- المطابقة وفحص الحياة ---------- */
 function match(desc) {
-  let best = { name: null, d: 9 };
-  for (const u of users) for (const ref of u.desc) { const d = dist(desc, ref); if (d < best.d) best = { name: u.name, d }; }
-  return best.d < thr ? best : { name: null, d: best.d };
+  const per = new Map();
+  for (const u of users) { let m = 9; for (const ref of u.desc) { const d = dist(desc, ref); if (d < m) m = d; } per.set(u.name, m); }
+  const s = [...per].sort((a, b) => a[1] - b[1]);
+  if (!s.length || s[0][1] >= thr) return { name: null, d: s.length ? s[0][1] : 9 };
+  if (s[1] && s[1][1] - s[0][1] < 0.04) return { name: null, d: s[0][1] };
+  return { name: s[0][0], d: s[0][1] };
 }
 function ear(p) {
   const e = (a, b, c, d, f, g) => (Math.hypot(p[b].x - p[g].x, p[b].y - p[g].y) + Math.hypot(p[c].x - p[f].x, p[c].y - p[f].y)) / (2 * Math.hypot(p[a].x - p[d].x, p[a].y - p[d].y));
@@ -344,7 +365,7 @@ function isLive(box, v, now) {
 async function loop() {
   if (!running) return;
   const t0 = performance.now(), useLive = $('live').checked;
-  const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: +$('size').value, scoreThreshold: 0.5 });
+  const opts = ($('det').value === 'ssd' && ssdReady) ? new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }) : new faceapi.TinyFaceDetectorOptions({ inputSize: +$('size').value, scoreThreshold: 0.5 });
   const res = await faceapi.detectAllFaces(video, opts).withFaceLandmarks().withFaceDescriptors();
   if (!running) return;
   lastRes = res; lastTs = Date.now();
@@ -353,11 +374,15 @@ async function loop() {
   const fs = Math.max(14, canvas.width / 24);
   ctx.font = `bold ${fs}px Tahoma, sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
   for (const r of res) {
-    const b = r.detection.box, m = users.length ? match(r.descriptor) : { name: null, d: 9 };
+    const b = r.detection.box, tk = getTrack(b, now);
+    const small = b.width < video.videoWidth * 0.1 || r.detection.score < 0.6;
+    tk.ds.push(r.descriptor); if (tk.ds.length > 4) tk.ds.shift();
+    const m = users.length && !small ? match(meanDesc(tk.ds)) : { name: null, d: 9 };
+    const stable = tk.ds.length >= 3;
     const live = useLive ? isLive(b, ear(r.landmarks.positions), now) : true;
-    const ok = m.name && live;
+    const ok = m.name && live && stable;
     const color = ok ? '#22c55e' : m.name ? '#38bdf8' : '#f59e0b';
-    const label = ok ? `${m.name} (${m.d.toFixed(2)})` : m.name ? `${m.name} - ارمش للتحقق` : 'غير معروف';
+    const label = ok ? `${m.name} (${m.d.toFixed(2)})` : m.name ? (live ? 'جاري التحقق...' : `${m.name} - ارمش للتحقق`) : small ? 'اقترب من الكاميرا' : 'غير معروف';
     ctx.lineWidth = 3; ctx.strokeStyle = color; ctx.strokeRect(b.x, b.y, b.width, b.height);
     const w = ctx.measureText(label).width + 12;
     ctx.fillStyle = color; ctx.fillRect(b.x, Math.max(0, b.y - fs - 8), w, fs + 8);
@@ -384,12 +409,15 @@ async function enroll() {
   if (!await guard()) return;
   $('btnEnroll').disabled = true;
   const N = 5, samples = [], good = r => r.detection.score > 0.7 && r.detection.box.width > video.videoWidth * 0.2;
+  toast(PR[0]);
   for (let i = 0; i < N; i++) {
     const t = Date.now(); let ok = false;
     while (Date.now() - t < 6000) { if (lastTs > t && lastRes.length === 1 && good(lastRes[0])) { ok = true; break; } await sleep(60); }
     if (!ok) { toast('لم يُرصد وجه واحد واضح. اقترب أو حسّن الإضاءة'); $('btnEnroll').disabled = false; return; }
-    samples.push(Array.from(lastRes[0].descriptor));
-    toast(`تم التقاط العينة ${i + 1} من ${N}`); await sleep(500);
+    const dsc = Array.from(lastRes[0].descriptor);
+    if (samples.length && dist(samples[0], dsc) > 0.65) { toast('لم يثبت الوجه أو تغيّر الشخص. أعد التسجيل'); $('btnEnroll').disabled = false; return; }
+    samples.push(dsc);
+    if (i < N - 1) { toast(`${i + 1}/${N} تم. ${PR[i + 1]}`); await sleep(1300); }
   }
   await saveSamples(name, samples);
   $('name').value = ''; $('btnEnroll').disabled = false; toast(`تم تسجيل ${name}`);
@@ -504,6 +532,123 @@ $('fileImport').onchange = async e => {
   for (const k in P) { d += 'M' + P[k].map(p => p.join(' ')).join('L') + (closed[k] ? 'Z' : ''); c += P[k].map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.6"/>`).join(''); }
   d += 'M100 108L120 130M140 108L120 130M85 115L55 80M155 115L185 80M120 30L100 108M120 30L140 108M95 205L75 215M145 205L165 215M120 160L120 212';
   $('mesh').insertAdjacentHTML('afterbegin', `<path d="${d}"/>${c}`);
+})();
+</script>
+<script>/* ===== دقة أعلى + الحفظ في مستودع GitHub الخاص ===== */
+const PR = ['انظر للأمام', 'أدر رأسك قليلاً لليمين', 'الآن لليسار', 'ارفع ذقنك قليلاً', 'ابتسم'];
+let ssdReady = false;
+const meanDesc = a => { const n = a.length, o = new Float32Array(128); for (const d of a) for (let i = 0; i < 128; i++) o[i] += d[i] / n; return o; };
+function getTrack(b, now) {
+  const cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+  let t = tracks.find(k => Math.hypot(k.cx - cx, k.cy - cy) < b.width);
+  if (!t) { t = { lb: 0, closed: false, ds: [] }; tracks.push(t); }
+  t.cx = cx; t.cy = cy; t.seen = now; return t;
+}
+$('det').onchange = async () => {
+  if ($('det').value === 'ssd' && !ssdReady) {
+    try { toast('جاري تحميل الكاشف الدقيق...'); await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL); ssdReady = true; toast('تم تفعيل الكاشف الدقيق'); }
+    catch { toast('تعذر تحميل الكاشف الدقيق'); $('det').value = 'tiny'; }
+  }
+};
+
+let admin = null, GH = null;
+const b64e = s => { const u = new TextEncoder().encode(s); let o = ''; for (let i = 0; i < u.length; i += 0x8000) o += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(o); };
+const b64d = b => new TextDecoder().decode(Uint8Array.from(atob(b.replace(/\s/g, '')), c => c.charCodeAt(0)));
+const gh = (path, opt = {}) => fetch('https://api.github.com/repos/' + GH.repo + path, { cache: 'no-store', ...opt, headers: { Authorization: 'Bearer ' + GH.tok, Accept: 'application/vnd.github+json', ...(opt.headers || {}) } });
+const rnd = d => d.map(r => Array.from(r, x => +(+x).toFixed(5)));
+async function ghRead() {
+  const r = await gh('/contents/faces.json');
+  if (r.status === 404) return { users: [], sha: null };
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  const txt = j.content ? b64d(j.content) : await (await gh('/contents/faces.json', { headers: { Accept: 'application/vnd.github.raw+json' } })).text();
+  return { users: JSON.parse(txt).users || [], sha: j.sha };
+}
+async function ghWrite(us, sha, msg) {
+  const body = { message: msg, content: b64e(JSON.stringify({ users: us })) }; if (sha) body.sha = sha;
+  const r = await gh('/contents/faces.json', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (r.status === 409 || r.status === 422) return false;
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return true;
+}
+async function ghUpdate(fn) {
+  for (let i = 0; i < 3; i++) { const { users: us, sha } = await ghRead(); if (await ghWrite(fn(us), sha, 'update faces')) return; }
+  throw new Error('conflict');
+}
+const ui = () => { $('btnAdmin').textContent = admin ? 'خروج المشرف' : 'دخول المشرف'; $('sCloud').textContent = admin ? 'متصل بـ GitHub' : 'غير مسجَّل'; };
+$('btnPin').style.display = 'none'; ui();
+guard = async () => { if (admin) return true; toast('سجّل دخول المشرف أولاً'); $('dlg').showModal(); return false; };
+const _lu = loadUsers;
+loadUsers = async () => {
+  await _lu();
+  if (!admin) { users = []; $('sUsers').textContent = 0; $('usrBody').innerHTML = '<tr><td colspan="3">سجّل دخول المشرف لعرض المسجلين.</td></tr>'; }
+};
+const _sv = saveSamples;
+saveSamples = async (name, samples) => {
+  await _sv(name, samples);
+  const u = users.find(x => x.name === name);
+  if (u) {
+    try {
+      await ghUpdate(us => { const e = { name: u.name, desc: rnd(u.desc) }, i = us.findIndex(x => x.name === u.name); if (i < 0) us.push(e); else us[i] = e; return us; });
+      toast('حُفظ على GitHub');
+    } catch { toast('تعذر الحفظ على GitHub'); }
+  }
+};
+$('usrBody').onclick = async e => {
+  const id = e.target.dataset.id; if (!id || !await guard()) return;
+  const u = users.find(x => x.id == id);
+  if (!confirm('حذف هذا الشخص؟')) return;
+  await req(store('users', 'readwrite').delete(+id));
+  if (u) { try { await ghUpdate(us => us.filter(x => x.name !== u.name)); } catch { toast('تعذر الحذف من GitHub'); } }
+  loadUsers();
+};
+async function syncDown() {
+  while (!db) await sleep(50);
+  try {
+    const { users: cu, sha } = await ghRead();
+    const cloud = new Map(cu.map(u => [u.name, u.desc]));
+    const local = await req(store('users').getAll());
+    let changed = false;
+    for (const u of local) if (!cloud.has(u.name) || cloud.get(u.name).length < u.desc.length) { cloud.set(u.name, rnd(u.desc)); changed = true; }
+    if (changed && !await ghWrite([...cloud].map(([name, desc]) => ({ name, desc })), sha, 'sync faces')) throw new Error('conflict');
+    await req(store('users', 'readwrite').clear());
+    for (const [name, desc] of cloud) await req(store('users', 'readwrite').add({ name, desc }));
+    return true;
+  } catch (e) { toast('تعذرت المزامنة: ' + e.message); return false; }
+}
+async function enter(repo, tok, remember) {
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !tok) throw new Error('أدخل المستودع بصيغة user/repo والرمز');
+  GH = { repo, tok };
+  try {
+    const r = await gh('');
+    if (!r.ok) throw new Error([401, 403, 404].includes(r.status) ? 'الرمز أو اسم المستودع غير صحيح' : 'HTTP ' + r.status);
+    if (!(await r.json()).private) throw new Error('المستودع عام! أنشئ مستودعاً خاصاً (Private) للبيانات');
+    admin = { repo };
+    if (!await syncDown()) throw new Error('تعذرت المزامنة');
+  } catch (e) { admin = null; GH = null; ui(); throw e; }
+  try { (remember ? localStorage : sessionStorage).setItem('gh', JSON.stringify({ repo, tok })); localStorage.setItem('ghrepo', repo); } catch {}
+  ui(); await loadUsers(); toast('تم الدخول وتحميل البيانات');
+}
+async function exitAdmin() {
+  admin = null; GH = null;
+  try { localStorage.removeItem('gh'); sessionStorage.removeItem('gh'); } catch {}
+  await req(store('users', 'readwrite').clear()); ui(); await loadUsers(); toast('تم الخروج ومسح النسخة المحلية');
+}
+$('btnAdmin').onclick = () => {
+  if (admin) return exitAdmin();
+  try { $('repo').value = localStorage.getItem('ghrepo') || 'mostfaiq1994-ctrl/face-data'; } catch {}
+  $('lerr').textContent = ''; $('dlg').showModal();
+};
+$('doLogin').onclick = async () => {
+  $('lerr').textContent = 'جاري التحقق...';
+  try { await enter($('repo').value.trim(), $('tok').value.trim(), $('remember').checked); $('tok').value = ''; $('dlg').close(); }
+  catch (e) { $('lerr').textContent = e.message === 'Failed to fetch' ? 'تعذر الاتصال بـ GitHub' : e.message; }
+};
+$('closeLogin').onclick = () => $('dlg').close();
+(async () => {
+  while (!db) await sleep(50);
+  await loadUsers();
+  try { const s = JSON.parse(localStorage.getItem('gh') || sessionStorage.getItem('gh') || 'null'); if (s) await enter(s.repo, s.tok, !!localStorage.getItem('gh')); } catch {}
 })();
 </script>
 </body>
